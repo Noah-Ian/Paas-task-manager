@@ -6,7 +6,16 @@ from datetime import datetime
 app = Flask(__name__)
 
 # Database configuration from environment variable
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///local.db')
+#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///local.db')
+# --- FIX DATABASE URL FOR RAILWAY ---
+# Railway sometimes gives "postgres://" but Flask needs "postgresql://"
+database_url = os.environ.get('DATABASE_URL')
+
+if database_url:
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+# Use Railway DB if available, otherwise fallback to local SQLite
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///local.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
