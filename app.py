@@ -36,9 +36,12 @@ def get_tasks():
         {
             "id": t.id,
             "title": t.title,
-            "description": t.description,
+            "description": t.description or "",
             "completed": t.completed,
-            "created_at": t.created_at.strftime("%Y-%m-%d %H:%M")
+            "created_at": (
+                t.created_at.strftime("%Y-%m-%d %H:%M")
+                if t.created_at else ""
+            )
         }
         for t in tasks
     ])
