@@ -6,16 +6,11 @@ from datetime import datetime
 app = Flask(__name__)
 
 # Database configuration from environment variable
-#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///local.db')
-# --- FIX DATABASE URL FOR RAILWAY ---
-# Railway sometimes gives "postgres://" but Flask needs "postgresql://"
-database_url = os.environ.get('DATABASE_URL')
-
-if database_url:
-    database_url = database_url.replace("postgres://", "postgresql://", 1)
-
-# Use Railway DB if available, otherwise fallback to local SQLite
-app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///local.db'
+# Railway provides postgres:// but SQLAlchemy needs postgresql://
+database_url = os.environ.get('DATABASE_URL', 'sqlite:///local.db')
+if database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -92,5 +87,5 @@ def delete_task(task_id):
     return jsonify({'message': 'Task deleted successfully'})
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT'))
+    port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
